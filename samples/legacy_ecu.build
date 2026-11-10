@@ -1,0 +1,23 @@
+# Legacy QNX 7.x Automotive ECU Buildfile containing QNX 8.0 migration and secpol defects
+[virtual=x86,bios +compress] .bootstrap = {
+    startup-bios -v
+    PATH=/proc/boot:/bin:/usr/bin LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib procnto-smp
+}
+
+[+script] .script = {
+    slogger2 &
+    io-pkt-v6-hc -ptcpip
+    ifconfig wm0 192.168.10.20 netmask 255.255.255.0
+    can_gateway_resmgr &
+    brake_safety_daemon &
+}
+
+[type=link] /lib/ldqnx-64.so.2=/proc/boot/libc.so
+
+libc.so.5
+libm.so.3
+[perms=0777] /usr/bin/diag_agent=diag_agent
+slogger2
+io-pkt-v6-hc
+can_gateway_resmgr
+brake_safety_daemon

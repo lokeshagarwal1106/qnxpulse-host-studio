@@ -1,0 +1,30 @@
+# Hardened QNX Neutrino 8.0 Image Buildfile (x86_64 QEMU / Industrial Target)
+[virtual=x86_64,bios +compress] .bootstrap = {
+    startup-x86_64 -v
+    PATH=/proc/boot:/bin:/usr/bin LD_LIBRARY_PATH=/proc/boot:/lib:/usr/lib procnto-smp-instr -v
+}
+
+[+script] .script = {
+    secpol -m -p /etc/system/config/secpol.bin
+    slogger2 -U 22:22 &
+    waitfor /dev/slog2 5
+    on -t io_sock_t /proc/boot/io-sock -d re
+    waitfor /dev/socket 5
+    on -t can_drv_t /proc/boot/can_gateway_resmgr -n /dev/can0 &
+    waitfor /dev/can0 5
+    on -t brake_safety_t /proc/boot/brake_safety_daemon &
+}
+
+[type=link] /lib/ldqnx-64.so.2=/proc/boot/libc.so
+
+libc.so.6
+libm.so.4
+libsocket.so.3
+[data=copy] /etc/system/config/secpol.bin=secpol.bin
+[perms=0755] /proc/boot/can_gateway_resmgr=can_gateway_resmgr
+[perms=0750] /proc/boot/brake_safety_daemon=brake_safety_daemon
+slogger2
+io-sock
+secpol
+on
+waitfor
